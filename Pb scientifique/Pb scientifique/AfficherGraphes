@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-public class GrapheVisualisation : Form
+public class GrapheVisualisation
 {
     private Graphe graphe;
 
