@@ -26,7 +26,7 @@ namespace Pb_scientifique
         }
         public string toString()
         {
-            return "Membre " + this.numero;
+            return "Relation " + this;
         }
     }
 }
