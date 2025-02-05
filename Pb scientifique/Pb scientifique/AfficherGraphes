@@ -1,85 +1,61 @@
-  public class GrapheVisualisation
+ using System;
+using System.Collections.Generic;
+using System.Drawing;
+
+public class GrapheVisualisation
+{
+    private Graphe graphe;
+
+    public GrapheVisualisation(Graphe graphe)
     {
-        private Graphe graphe;
+        this.graphe = graphe;
+    }
 
-        public GrapheVisualisation(Graphe graphe)
+    public void DessinerGraphe(string cheminFichierImage)
+    {
+        int largeurImage = 600;
+        int hauteurImage = 600;
+        Bitmap image = new Bitmap(largeurImage, hauteurImage);
+
+        using (Graphics g = Graphics.FromImage(image))
         {
-            this.graphe = graphe;
-        }
+            g.Clear(Color.White);
 
-        public void DessinerGraphe(string cheminFichierImage)
-        {
-            int largeurImage = 600;
-            int hauteurImage = 600;
-            Bitmap image = new Bitmap(largeurImage, hauteurImage);
+            Dictionary<Noeud, Point> positions = new Dictionary<Noeud, Point>();
+            int rayon = 200;
+            int centreX = largeurImage / 2;
+            int centreY = hauteurImage / 2;
+            int nbNoeuds = graphe.GetNoeuds().Count;
+            double angleStep = 2 * Math.PI / nbNoeuds;
 
-            using (Graphics g = Graphics.FromImage(image))
+            int index = 0;
+            foreach (var noeud in graphe.GetNoeuds())
             {
-                g.Clear(Color.White);
+                int x = centreX + (int)(rayon * Math.Cos(index * angleStep));
+                int y = centreY + (int)(rayon * Math.Sin(index * angleStep));
+                positions[noeud] = new Point(x, y);
+                index++;
+            }
 
-                Dictionary<int, Point> positions = new Dictionary<int, Point>();
-                int rayon = 200;
-                int centreX = largeurImage / 2;
-                int centreY = hauteurImage / 2;
-                int nbNoeuds = graphe.GetNbNoeuds();
-                double angleStep = 2 * Math.PI / nbNoeuds;
-
-                int index = 0;
-                foreach (var noeud in graphe.GetListeAdjacence().Keys)
+            Pen pen = new Pen(Color.Black, 2);
+            foreach (var noeud in graphe.GetNoeuds())
+            {
+                foreach (var voisin in noeud.GetVoisins())
                 {
-                    int x = centreX + (int)(rayon * Math.Cos(index * angleStep));
-                    int y = centreY + (int)(rayon * Math.Sin(index * angleStep));
-                    positions[noeud] = new Point(x, y);
-                    index++;
-                }
-
-                Pen pen = new Pen(Color.Black, 2);
-                foreach (var entry in graphe.GetListeAdjacence())
-                {
-                    int noeud1 = entry.Key;
-                    foreach (int noeud2 in entry.Value)
-                    {
-                        g.DrawLine(pen, positions[noeud1], positions[noeud2]);
-                    }
-                }
-
-                foreach (var entry in positions)
-                {
-                    int x = entry.Value.X;
-                    int y = entry.Value.Y;
-                    g.FillEllipse(Brushes.Blue, x - 10, y - 10, 20, 20);
-                    g.DrawString(entry.Key.ToString(), new Font("Arial", 12), Brushes.White, x - 7, y - 7);
+                    g.DrawLine(pen, positions[noeud], positions[voisin]);
                 }
             }
 
-            image.Save(cheminFichierImage);
-            Console.WriteLine($"Le graphe a été sauvegardé sous le nom '{cheminFichierImage}'.");
+            foreach (var entry in positions)
+            {
+                int x = entry.Value.X;
+                int y = entry.Value.Y;
+                g.FillEllipse(Brushes.Blue, x - 10, y - 10, 20, 20);
+                g.DrawString(entry.Key.Numero.ToString(), new Font("Arial", 12), Brushes.White, x - 7, y - 7);
+            }
         }
-    }
-}
-Utilisation :
 
-Voici comment vous pouvez utiliser ces classes pour créer un graphe, le visualiser et enregistrer l'image résultante :
-
-csharp
-Copier
-Modifier
-using System;
-
-namespace Pb_scientifique
-{
-    class Program
-    {
-        static void Main()
-        {
-            Graphe graphe = new Graphe();
-            graphe.AjouterLien(1, 2);
-            graphe.AjouterLien(1, 3);
-            graphe.AjouterLien(2, 4);
-            graphe.AjouterLien(3, 4);
-
-            GrapheVisualisation visualisation = new GrapheVisualisation(graphe);
-            visualisation.DessinerGraphe("graphe.png");
-        }
+        image.Save(cheminFichierImage);
+        Console.WriteLine($"Le graphe a été sauvegardé sous le nom '{cheminFichierImage}'.");
     }
 }
