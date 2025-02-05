@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pb_scientifique
 {
-    internal class Lien
+    public class Lien
     {
         public Noeud Noeud1
         {
@@ -26,7 +26,7 @@ namespace Pb_scientifique
         }
         public string toString()
         {
-            return "Relation " + this;
+            return $"Relation entre {Noeud1.Numero} et {Noeud2.Numero} ";
         }
 
     }

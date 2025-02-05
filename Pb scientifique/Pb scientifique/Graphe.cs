@@ -6,123 +6,94 @@ using System.Threading.Tasks;
 
 namespace Pb_scientifique
 {
-    internal class Graphe
+    public class Graphe
     {
-        private List<int> noeuds;
-        private List<Lien> liens;
-        private Dictionary<int, List<int>> listeAdjacence;
-        private int[,] matriceAdjacence;
+        private Dictionary<int, List<int>> listeAdjacence; // Stocke les relations entre les membres
 
-        public Graphe(int nbSommets)
+        public Graphe()
         {
-            noeuds = new List<int>();
-            liens = new List<Lien>();
             listeAdjacence = new Dictionary<int, List<int>>();
-            matriceAdjacence = new int[nbSommets, nbSommets];
-
-            // Création des sommets
-            for (int i = 1; i <= nbSommets; i++)
-            {
-                noeuds.Add(i);
-                listeAdjacence[i] = new List<int>(); // Chaque sommet a une liste de voisins
-            }
         }
 
+        // Ajouter une relation entre deux membres
         public void AjouterLien(int num1, int num2)
         {
-            if (listeAdjacence.ContainsKey(num1) && listeAdjacence.ContainsKey(num2))
-            {
-                listeAdjacence[num1].Add(num2);
-                listeAdjacence[num2].Add(num1);
+            if (!listeAdjacence.ContainsKey(num1))
+                listeAdjacence[num1] = new List<int>();
 
-                matriceAdjacence[num1 - 1, num2 - 1] = 1;
-                matriceAdjacence[num2 - 1, num1 - 1] = 1;
-            }
+            if (!listeAdjacence.ContainsKey(num2))
+                listeAdjacence[num2] = new List<int>();
+
+            // Ajouter la relation (dans les deux sens car c’est réciproque)
+            listeAdjacence[num1].Add(num2);
+            listeAdjacence[num2].Add(num1);
         }
 
+        // Afficher la liste d'adjacence
         public void AfficherListeAdjacence()
         {
-            Console.WriteLine("Liste d'adjacence :");
-            foreach (var entry in listeAdjacence)
+            Console.WriteLine("Liste d'adjacence du graphe :");
+            foreach (var noeud in listeAdjacence)
             {
-                Console.Write(entry.Key + " -> ");
-                foreach (var voisin in entry.Value) // Utilisation directe de la liste d'adjacence
-                {
-                    Console.Write(voisin + " ");
-                }
-                Console.WriteLine();
+                Console.Write(noeud.Key + " -> ");
+                Console.WriteLine(string.Join(", ", noeud.Value));
             }
         }
 
-        public void AfficherMatriceAdjacence()
+        // Vérifier si le graphe est connexe
+        public bool EstConnexe()
         {
-            Console.WriteLine("\nMatrice d'adjacence :");
-            for (int i = 0; i < matriceAdjacence.GetLength(0); i++)
+            if (listeAdjacence.Count == 0) return false;
+
+            HashSet<int> visites = new HashSet<int>();
+            int premierNoeud = new List<int>(listeAdjacence.Keys)[0];
+
+            ExplorerEnProfondeur(premierNoeud, visites);
+
+            return visites.Count == listeAdjacence.Count;
+        }
+
+        // Vérifier si le graphe contient un cycle
+        public bool ContientCycle()
+        {
+            HashSet<int> visites = new HashSet<int>();
+            foreach (var noeud in listeAdjacence.Keys)
             {
-                for (int j = 0; j < matriceAdjacence.GetLength(1); j++)
+                if (!visites.Contains(noeud))
                 {
-                    Console.Write(matriceAdjacence[i, j] + " ");
+                    if (ExplorerCycle(noeud, -1, visites)) return true;
                 }
-                Console.WriteLine();
+            }
+            return false;
+        }
+
+        // Parcours en profondeur pour vérifier la connexité
+        private void ExplorerEnProfondeur(int noeud, HashSet<int> visites)
+        {
+            visites.Add(noeud);
+            foreach (var voisin in listeAdjacence[noeud])
+            {
+                if (!visites.Contains(voisin))
+                    ExplorerEnProfondeur(voisin, visites);
             }
         }
 
-        public void ParcoursEnLargeur(int debut)
+        // Parcours pour détecter un cycle
+        private bool ExplorerCycle(int noeud, int parent, HashSet<int> visites)
         {
-            Noeud startNode = noeuds.Find(n => n.Numero == debut);
-            if (startNode == null) return;
-
-            bool[] visite = new bool[noeuds.Count];
-            Queue<Noeud> file = new Queue<Noeud>();
-            file.Enqueue(startNode);
-            visite[startNode.Numero - 1] = true;
-
-            Console.WriteLine("\nParcours en largeur à partir du sommet " + debut + " :");
-            while (file.Count > 0)
+            visites.Add(noeud);
+            foreach (var voisin in listeAdjacence[noeud])
             {
-                Noeud courant = file.Dequeue();
-                Console.Write(courant.Numero + " ");
-
-                foreach (var voisin in courant.Voisins)
+                if (!visites.Contains(voisin))
                 {
-                    if (!visite[voisin.Numero - 1])
-                    {
-                        file.Enqueue(voisin);
-                        visite[voisin.Numero - 1] = true;
-                    }
+                    if (ExplorerCycle(voisin, noeud, visites)) return true;
+                }
+                else if (voisin != parent)
+                {
+                    return true;
                 }
             }
-        }
-
-        // Parcours en profondeur (DFS)
-        public void ParcoursEnProfondeur(int debut)
-        {
-            Noeud startNode = noeuds.Find(n => n.Numero == debut);
-            if (startNode == null) return;
-
-            bool[] visite = new bool[noeuds.Count];
-            Stack<Noeud> pile = new Stack<Noeud>();
-            pile.Push(startNode);
-
-            Console.WriteLine("\nParcours en profondeur à partir du sommet " + debut + " :");
-            while (pile.Count > 0)
-            {
-                Noeud courant = pile.Pop();
-
-                if (!visite[courant.Numero - 1])
-                {
-                    Console.Write(courant.Numero + " ");
-                    visite[courant.Numero - 1] = true;
-                }
-
-                foreach (var voisin in courant.Voisins)
-                {
-                    if (!visite[voisin.Numero - 1])
-                    {
-                        pile.Push(voisin);
-                    }
-                }
-            }
+            return false;
         }
     }
 }
