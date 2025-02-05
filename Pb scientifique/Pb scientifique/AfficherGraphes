@@ -1,0 +1,58 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+public class GrapheVisualisation : Form
+{
+    private Graphe graphe;
+
+    public GrapheVisualisation(Graphe graphe)
+    {
+        this.graphe = graphe;
+        this.Text = "Visualisation du Graphe";
+        this.Size = new Size(600, 600);
+        this.Paint += new PaintEventHandler(DessinerGraphe);
+    }
+
+    private void DessinerGraphe(object sender, PaintEventArgs e)
+    {
+        Graphics g = e.Graphics;
+        Dictionary<int, Point> positions = new Dictionary<int, Point>();
+        int rayon = 200;
+        int centreX = this.ClientSize.Width / 2;
+        int centreY = this.ClientSize.Height / 2;
+        int nbNoeuds = graphe.GetNbNoeuds();
+        double angleStep = 2 * Math.PI / nbNoeuds;
+
+        // Calculer la position de chaque nœud en cercle
+        int index = 0;
+        foreach (var noeud in graphe.GetListeAdjacence().Keys)
+        {
+            int x = centreX + (int)(rayon * Math.Cos(index * angleStep));
+            int y = centreY + (int)(rayon * Math.Sin(index * angleStep));
+            positions[noeud] = new Point(x, y);
+            index++;
+        }
+
+        // Dessiner les liens
+        Pen pen = new Pen(Color.Black, 2);
+        foreach (var entry in graphe.GetListeAdjacence())
+        {
+            int noeud1 = entry.Key;
+            foreach (int noeud2 in entry.Value)
+            {
+                g.DrawLine(pen, positions[noeud1], positions[noeud2]);
+            }
+        }
+
+        // Dessiner les nœuds
+        foreach (var entry in positions)
+        {
+            int x = entry.Value.X;
+            int y = entry.Value.Y;
+            g.FillEllipse(Brushes.Blue, x - 10, y - 10, 20, 20);
+            g.DrawString(entry.Key.ToString(), new Font("Arial", 12), Brushes.White, x - 7, y - 7);
+        }
+    }
+}
