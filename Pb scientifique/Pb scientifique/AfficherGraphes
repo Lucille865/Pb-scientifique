@@ -1,66 +1,88 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Forms;
 
 public class GrapheVisualisation
 {
     private Graphe graphe;
 
-    // Le constructeur pour initialiser le graphe et la fenêtre
     public GrapheVisualisation(Graphe graphe)
     {
         this.graphe = graphe;
-        this.Text = "Visualisation du Graphe";  // Titre de la fenêtre
-        this.Size = new Size(600, 600);  // Taille de la fenêtre
-        this.Paint += new PaintEventHandler(DessinerGraphe);  // Méthode pour dessiner le graphe
     }
 
-    // La méthode qui dessine le graphe à l'écran
-    private void DessinerGraphe(object sender, PaintEventArgs e)
+    public void DessinerGraphe(string cheminFichierImage)
     {
-        // Créer un objet Graphics pour dessiner
-        Graphics g = e.Graphics;
-        Dictionary<int, Point> positions = new Dictionary<int, Point>();
+        int largeurImage = 600;
+        int hauteurImage = 600;
+        Bitmap image = new Bitmap(largeurImage, hauteurImage);
 
-        // Définir un rayon pour placer les nœuds en cercle
-        int rayon = 200;
-        int centreX = this.ClientSize.Width / 2;  // Le centre de la fenêtre en X
-        int centreY = this.ClientSize.Height / 2;  // Le centre de la fenêtre en Y
-        int nbNoeuds = graphe.GetNbNoeuds();  // Nombre de nœuds dans le graphe
-        double angleStep = 2 * Math.PI / nbNoeuds;  // L'angle entre chaque nœud pour les disposer en cercle
-
-        // Calculer la position de chaque nœud en cercle
-        int index = 0;
-        foreach (var noeud in graphe.GetListeAdjacence().Keys)
+        using (Graphics g = Graphics.FromImage(image))
         {
-            int x = centreX + (int)(rayon * Math.Cos(index * angleStep));  // Coordonnée X du nœud
-            int y = centreY + (int)(rayon * Math.Sin(index * angleStep));  // Coordonnée Y du nœud
-            positions[noeud] = new Point(x, y);  // Sauvegarder la position du nœud dans un dictionnaire
-            index++;
-        }
+            g.Clear(Color.White);
 
-        // Dessiner les liens (les arêtes entre les nœuds)
-        Pen pen = new Pen(Color.Black, 2);  // Créer un stylo pour dessiner les liens
-        foreach (var entry in graphe.GetListeAdjacence())
-        {
-            int noeud1 = entry.Key;  // Le premier nœud
-            foreach (int noeud2 in entry.Value)
+            Dictionary<int, Point> positions = new Dictionary<int, Point>();
+            int rayon = 200;
+            int centreX = largeurImage / 2;
+            int centreY = hauteurImage / 2;
+            int nbNoeuds = graphe.GetNbNoeuds();
+            double angleStep = 2 * Math.PI / nbNoeuds;
+
+            int index = 0;
+            foreach (var noeud in graphe.GetListeAdjacence().Keys)
             {
-                // Dessiner une ligne entre les nœuds
-                g.DrawLine(pen, positions[noeud1], positions[noeud2]);
+                int x = centreX + (int)(rayon * Math.Cos(index * angleStep));
+                int y = centreY + (int)(rayon * Math.Sin(index * angleStep));
+                positions[noeud] = new Point(x, y);
+                index++;
+            }
+
+            Pen pen = new Pen(Color.Black, 2);
+            foreach (var entry in graphe.GetListeAdjacence())
+            {
+                int noeud1 = entry.Key;
+                foreach (int noeud2 in entry.Value)
+                {
+                    g.DrawLine(pen, positions[noeud1], positions[noeud2]);
+                }
+            }
+
+            foreach (var entry in positions)
+            {
+                int x = entry.Value.X;
+                int y = entry.Value.Y;
+                g.FillEllipse(Brushes.Blue, x - 10, y - 10, 20, 20);
+                g.DrawString(entry.Key.ToString(), new Font("Arial", 12), Brushes.White, x - 7, y - 7);
             }
         }
 
-        // Dessiner les nœuds (les cercles représentant les sommets)
-        foreach (var entry in positions)
-        {
-            int x = entry.Value.X;  // Coordonnée X du nœud
-            int y = entry.Value.Y;  // Coordonnée Y du nœud
+        image.Save(cheminFichierImage);
+        Console.WriteLine($"Le graphe a été sauvegardé sous le nom '{cheminFichierImage}'.");
+    }
+}
+Utilisation :
 
-            // Dessiner un cercle pour chaque nœud
-            g.FillEllipse(Brushes.Blue, x - 10, y - 10, 20, 20);  // Remplir avec une couleur bleue
-            g.DrawString(entry.Key.ToString(), new Font("Arial", 12), Brushes.White, x - 7, y - 7);  // Afficher le numéro du nœud
-        }
+Voici comment vous pouvez utiliser ces classes pour créer un graphe, le visualiser et enregistrer l'image résultante :
+
+csharp
+Copier
+Modifier
+class Program
+{
+    static void Main()
+    {
+        Graphe graphe = new Graphe();
+        graphe.AjouterNoeud(1);
+        graphe.AjouterNoeud(2);
+        graphe.AjouterNoeud(3);
+        graphe.AjouterNoeud(4);
+
+        graphe.AjouterLien(1, 2);
+        graphe.AjouterLien(1, 3);
+        graphe.AjouterLien(2, 4);
+        graphe.AjouterLien(3, 4);
+
+        GrapheVisualisation visualisation = new GrapheVisualisation(graphe);
+        visualisation.DessinerGraphe("graphe.png");
     }
 }
