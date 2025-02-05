@@ -66,5 +66,63 @@ namespace Pb_scientifique
                 Console.WriteLine();
             }
         }
+
+        public void ParcoursEnLargeur(int debut)
+        {
+            Noeud startNode = noeuds.Find(n => n.Numero == debut);
+            if (startNode == null) return;
+
+            bool[] visite = new bool[noeuds.Count];
+            Queue<Noeud> file = new Queue<Noeud>();
+            file.Enqueue(startNode);
+            visite[startNode.Numero - 1] = true;
+
+            Console.WriteLine("\nParcours en largeur à partir du sommet " + debut + " :");
+            while (file.Count > 0)
+            {
+                Noeud courant = file.Dequeue();
+                Console.Write(courant.Numero + " ");
+
+                foreach (var voisin in courant.Voisins)
+                {
+                    if (!visite[voisin.Numero - 1])
+                    {
+                        file.Enqueue(voisin);
+                        visite[voisin.Numero - 1] = true;
+                    }
+                }
+            }
+        }
+
+        // Parcours en profondeur (DFS)
+        public void ParcoursEnProfondeur(int debut)
+        {
+            Noeud startNode = noeuds.Find(n => n.Numero == debut);
+            if (startNode == null) return;
+
+            bool[] visite = new bool[noeuds.Count];
+            Stack<Noeud> pile = new Stack<Noeud>();
+            pile.Push(startNode);
+
+            Console.WriteLine("\nParcours en profondeur à partir du sommet " + debut + " :");
+            while (pile.Count > 0)
+            {
+                Noeud courant = pile.Pop();
+
+                if (!visite[courant.Numero - 1])
+                {
+                    Console.Write(courant.Numero + " ");
+                    visite[courant.Numero - 1] = true;
+                }
+
+                foreach (var voisin in courant.Voisins)
+                {
+                    if (!visite[voisin.Numero - 1])
+                    {
+                        pile.Push(voisin);
+                    }
+                }
+            }
+        }
     }
 }
