@@ -1,0 +1,83 @@
+using System;
+using System.Collections.Generic;
+using SkiaSharp;
+
+class GraphVisualizer
+{
+    private Dictionary<int, List<int>> adjacencyList;
+    
+    public GraphVisualizer()
+    {
+        adjacencyList = new Dictionary<int, List<int>>();
+    }
+    
+    public void AddEdge(int node1, int node2)
+    {
+        if (!adjacencyList.ContainsKey(node1))
+            adjacencyList[node1] = new List<int>();
+        if (!adjacencyList.ContainsKey(node2))
+            adjacencyList[node2] = new List<int>();
+        
+        adjacencyList[node1].Add(node2);
+        adjacencyList[node2].Add(node1);
+    }
+    
+    public void DrawGraph(string filePath)
+    {
+        int width = 500, height = 500;
+        using (SKBitmap bitmap = new SKBitmap(width, height))
+        using (SKCanvas canvas = new SKCanvas(bitmap))
+        using (SKPaint paint = new SKPaint { Color = SKColors.Black, StrokeWidth = 2 })
+        {
+            canvas.Clear(SKColors.White);
+            Random rand = new Random();
+            Dictionary<int, SKPoint> positions = new Dictionary<int, SKPoint>();
+            
+            foreach (var node in adjacencyList.Keys)
+            {
+                positions[node] = new SKPoint(rand.Next(50, width - 50), rand.Next(50, height - 50));
+            }
+            
+            foreach (var node in adjacencyList)
+            {
+                foreach (var neighbor in node.Value)
+                {
+                    canvas.DrawLine(positions[node.Key], positions[neighbor], paint);
+                }
+            }
+            
+            using (SKPaint nodePaint = new SKPaint { Color = SKColors.Blue, IsAntialias = true })
+            using (SKPaint textPaint = new SKPaint { Color = SKColors.White, TextSize = 20, IsAntialias = true })
+            {
+                foreach (var node in positions)
+                {
+                    canvas.DrawCircle(node.Value, 20, nodePaint);
+                    canvas.DrawText(node.Key.ToString(), node.Value.X - 10, node.Value.Y + 5, textPaint);
+                }
+            }
+            
+            using (var image = SKImage.FromBitmap(bitmap))
+            using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+            using (var stream = System.IO.File.OpenWrite(filePath))
+            {
+                data.SaveTo(stream);
+            }
+        }
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        GraphVisualizer graph = new GraphVisualizer();
+        graph.AddEdge(1, 2);
+        graph.AddEdge(2, 3);
+        graph.AddEdge(3, 4);
+        graph.AddEdge(4, 1);
+        graph.AddEdge(1, 3);
+        
+        graph.DrawGraph("graph.png");
+        Console.WriteLine("Graph saved as graph.png");
+    }
+}
