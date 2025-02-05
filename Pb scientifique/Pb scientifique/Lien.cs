@@ -28,5 +28,6 @@ namespace Pb_scientifique
         {
             return "Relation " + this;
         }
+
     }
 }
