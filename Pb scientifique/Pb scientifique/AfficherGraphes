@@ -1,63 +1,60 @@
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-
-public class GrapheVisualisation
-{
-    private Graphe graphe;
-
-    public GrapheVisualisation(Graphe graphe)
+  public class GrapheVisualisation
     {
-        this.graphe = graphe;
-    }
+        private Graphe graphe;
 
-    public void DessinerGraphe(string cheminFichierImage)
-    {
-        int largeurImage = 600;
-        int hauteurImage = 600;
-        Bitmap image = new Bitmap(largeurImage, hauteurImage);
-
-        using (Graphics g = Graphics.FromImage(image))
+        public GrapheVisualisation(Graphe graphe)
         {
-            g.Clear(Color.White);
+            this.graphe = graphe;
+        }
 
-            Dictionary<int, Point> positions = new Dictionary<int, Point>();
-            int rayon = 200;
-            int centreX = largeurImage / 2;
-            int centreY = hauteurImage / 2;
-            int nbNoeuds = graphe.GetNbNoeuds();
-            double angleStep = 2 * Math.PI / nbNoeuds;
+        public void DessinerGraphe(string cheminFichierImage)
+        {
+            int largeurImage = 600;
+            int hauteurImage = 600;
+            Bitmap image = new Bitmap(largeurImage, hauteurImage);
 
-            int index = 0;
-            foreach (var noeud in graphe.GetListeAdjacence().Keys)
+            using (Graphics g = Graphics.FromImage(image))
             {
-                int x = centreX + (int)(rayon * Math.Cos(index * angleStep));
-                int y = centreY + (int)(rayon * Math.Sin(index * angleStep));
-                positions[noeud] = new Point(x, y);
-                index++;
-            }
+                g.Clear(Color.White);
 
-            Pen pen = new Pen(Color.Black, 2);
-            foreach (var entry in graphe.GetListeAdjacence())
-            {
-                int noeud1 = entry.Key;
-                foreach (int noeud2 in entry.Value)
+                Dictionary<int, Point> positions = new Dictionary<int, Point>();
+                int rayon = 200;
+                int centreX = largeurImage / 2;
+                int centreY = hauteurImage / 2;
+                int nbNoeuds = graphe.GetNbNoeuds();
+                double angleStep = 2 * Math.PI / nbNoeuds;
+
+                int index = 0;
+                foreach (var noeud in graphe.GetListeAdjacence().Keys)
                 {
-                    g.DrawLine(pen, positions[noeud1], positions[noeud2]);
+                    int x = centreX + (int)(rayon * Math.Cos(index * angleStep));
+                    int y = centreY + (int)(rayon * Math.Sin(index * angleStep));
+                    positions[noeud] = new Point(x, y);
+                    index++;
+                }
+
+                Pen pen = new Pen(Color.Black, 2);
+                foreach (var entry in graphe.GetListeAdjacence())
+                {
+                    int noeud1 = entry.Key;
+                    foreach (int noeud2 in entry.Value)
+                    {
+                        g.DrawLine(pen, positions[noeud1], positions[noeud2]);
+                    }
+                }
+
+                foreach (var entry in positions)
+                {
+                    int x = entry.Value.X;
+                    int y = entry.Value.Y;
+                    g.FillEllipse(Brushes.Blue, x - 10, y - 10, 20, 20);
+                    g.DrawString(entry.Key.ToString(), new Font("Arial", 12), Brushes.White, x - 7, y - 7);
                 }
             }
 
-            foreach (var entry in positions)
-            {
-                int x = entry.Value.X;
-                int y = entry.Value.Y;
-                g.FillEllipse(Brushes.Blue, x - 10, y - 10, 20, 20);
-                g.DrawString(entry.Key.ToString(), new Font("Arial", 12), Brushes.White, x - 7, y - 7);
-            }
+            image.Save(cheminFichierImage);
+            Console.WriteLine($"Le graphe a été sauvegardé sous le nom '{cheminFichierImage}'.");
         }
-
-        image.Save(cheminFichierImage);
-        Console.WriteLine($"Le graphe a été sauvegardé sous le nom '{cheminFichierImage}'.");
     }
 }
 Utilisation :
@@ -67,22 +64,22 @@ Voici comment vous pouvez utiliser ces classes pour créer un graphe, le visuali
 csharp
 Copier
 Modifier
-class Program
+using System;
+
+namespace Pb_scientifique
 {
-    static void Main()
+    class Program
     {
-        Graphe graphe = new Graphe();
-        graphe.AjouterNoeud(1);
-        graphe.AjouterNoeud(2);
-        graphe.AjouterNoeud(3);
-        graphe.AjouterNoeud(4);
+        static void Main()
+        {
+            Graphe graphe = new Graphe();
+            graphe.AjouterLien(1, 2);
+            graphe.AjouterLien(1, 3);
+            graphe.AjouterLien(2, 4);
+            graphe.AjouterLien(3, 4);
 
-        graphe.AjouterLien(1, 2);
-        graphe.AjouterLien(1, 3);
-        graphe.AjouterLien(2, 4);
-        graphe.AjouterLien(3, 4);
-
-        GrapheVisualisation visualisation = new GrapheVisualisation(graphe);
-        visualisation.DessinerGraphe("graphe.png");
+            GrapheVisualisation visualisation = new GrapheVisualisation(graphe);
+            visualisation.DessinerGraphe("graphe.png");
+        }
     }
 }
