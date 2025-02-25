@@ -34,5 +34,11 @@ namespace Pb_scientifique
         {
             return "Membre "+this.numero;
         }
+
+        public List<Noeud> GetVoisins()
+        {
+            return voisins;
+        }
+
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pb_scientifique
 {
-    internal class Lien
+    public class Lien
     {
         public Noeud Noeud1
         {

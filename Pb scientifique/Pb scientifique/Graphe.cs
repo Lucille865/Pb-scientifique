@@ -77,7 +77,35 @@ namespace Pb_scientifique
                     ExplorerEnProfondeur(voisin, visites);
             }
         }
+        // Parcours en largeur
+        public void ParcoursLargeur(int sommetDepart)
+        {
+            HashSet<int> visites = new HashSet<int>(); // Pour garder une trace des sommets visités
+            Queue<int> file = new Queue<int>(); // File pour gérer l'ordre des visites
 
+            file.Enqueue(sommetDepart);
+            visites.Add(sommetDepart);
+
+            Console.Write("Parcours en largeur : ");
+
+            while (file.Count > 0)
+            {
+                int noeud = file.Dequeue(); // On sort le premier élément de la file
+                Console.Write(noeud + " "); // Affichage immédiat
+
+                // Ajouter les voisins non encore visités
+                foreach (var voisin in listeAdjacence[noeud])
+                {
+                    if (!visites.Contains(voisin))
+                    {
+                        file.Enqueue(voisin);
+                        visites.Add(voisin);
+                    }
+                }
+            }
+            Console.WriteLine();
+        }
+    
         // Parcours pour détecter un cycle
         private bool ExplorerCycle(int noeud, int parent, HashSet<int> visites)
         {
@@ -95,5 +123,18 @@ namespace Pb_scientifique
             }
             return false;
         }
+
+        public List<Noeud> GetNoeuds()
+        {
+            List<Noeud> noeuds = new List<Noeud>();
+
+            foreach (var key in listeAdjacence.Keys)
+            {
+                noeuds.Add(new Noeud(key)); // Crée un Noeud pour chaque clé du dictionnaire
+            }
+
+            return noeuds;
+        }
+
     }
 }
