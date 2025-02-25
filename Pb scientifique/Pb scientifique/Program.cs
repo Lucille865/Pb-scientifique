@@ -1,16 +1,26 @@
-﻿namespace Pb_scientifique
+﻿using Pb_scientifique;
+using System;
+using System.IO;
+
+namespace Pb_scientifique
 {
     public class Program
     {
         static void Main(string[] args)
         {
-
             string cheminFichier = "soc-karate.mtx";
             Graphe graphe = new Graphe();
+            AfficheGraphe image = new AfficheGraphe();
+            image.ChargerDepuisFichier(cheminFichier);
             LireRelationsDepuisFichier(cheminFichier, graphe);
+
+            // Affichage des informations
             graphe.AfficherListeAdjacence();
             Console.WriteLine("Le graphe est-il connexe ? " + (graphe.EstConnexe() ? "Oui" : "Non"));
             Console.WriteLine("Le graphe contient-il des cycles ? " + (graphe.ContientCycle() ? "Oui" : "Non"));
+
+            // Dessiner le graphe
+            image.DessinerGraphe("graphe.png");
         }
 
         static void LireRelationsDepuisFichier(string cheminFichier, Graphe graphe)
@@ -31,15 +41,6 @@
                     graphe.AjouterLien(num1, num2);
                 }
             }
-            Graphe graphe1 = new Graphe();
-            // Ajouter des nœuds et des relations
-            graphe1.AjouterLien(1, 2);
-            graphe1.AjouterLien(2, 3);
-            graphe1.AjouterLien(3, 1);
-
-            GrapheVisualisation visualisation = new GrapheVisualisation(graphe);
-            visualisation.DessinerGraphe("graphe.png");
-
         }
     }
 }

@@ -77,7 +77,7 @@ namespace Pb_scientifique
                     ExplorerEnProfondeur(voisin, visites);
             }
         }
-        // Parcours en largeur
+        /*// Parcours en largeur
         public void ParcoursLargeur(int sommetDepart)
         {
             HashSet<int> visites = new HashSet<int>(); // Pour garder une trace des sommets visités
@@ -104,7 +104,7 @@ namespace Pb_scientifique
                 }
             }
             Console.WriteLine();
-        }
+        }*/
     
         // Parcours pour détecter un cycle
         private bool ExplorerCycle(int noeud, int parent, HashSet<int> visites)

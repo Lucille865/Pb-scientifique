@@ -1,44 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
 
-namespace Pb_scientifique
-{
-    public class Noeud
+    namespace Pb_scientifique
     {
-        public int numero;
-        public List<Noeud> voisins;
-
-        public Noeud(int numero)
+        public class Noeud
         {
-            this.numero = numero;
-            this.voisins = new List<Noeud>();
-        }
+            public int numero;
+            public List<Noeud> voisins;
 
-        public int Numero
-        {get { return numero; }}
-
-        public List<Noeud> Voisins 
-        { get { return voisins; } }
-
-        public void AjouterVoisins(Noeud voisin)
-        {
-            if (!Voisins.Contains(voisin)){
-                Voisins.Add(voisin);
+            public Noeud(int numero)
+            {
+                this.numero = numero;
+                this.voisins = new List<Noeud>();
             }
-        }
 
-        public string toString()
-        {
-            return "Membre "+this.numero;
-        }
+            public int Numero
+            {get { return numero; }}
 
-        public List<Noeud> GetVoisins()
-        {
-            return voisins;
-        }
+            public List<Noeud> Voisins 
+            { get { return voisins; } }
 
+            public void AjouterVoisins(Noeud voisin)
+            {
+                if (!Voisins.Contains(voisin)){
+                    Voisins.Add(voisin);
+                }
+            }
+
+            public string toString()
+            {
+                    return Numero.ToString();
+                }
+
+            public List<Noeud> GetVoisins()
+            {
+                return voisins;
+            }
+
+        }
     }
-}
