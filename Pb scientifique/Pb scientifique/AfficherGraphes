@@ -1,61 +1,116 @@
- using System;
+using Pb_scientifique;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-public class GrapheVisualisation
+public class AfficheGraphe
 {
-    private Graphe graphe;
+    public List<Noeud> Noeuds { get; set; } = new List<Noeud>();
+    public List<Lien> Liens { get; set; } = new List<Lien>();
 
-    public GrapheVisualisation(Graphe graphe)
+    public void ChargerDepuisFichier(string cheminFichier)
     {
-        this.graphe = graphe;
-    }
-
-    public void DessinerGraphe(string cheminFichierImage)
-    {
-        int largeurImage = 600;
-        int hauteurImage = 600;
-        Bitmap image = new Bitmap(largeurImage, hauteurImage);
-
-        using (Graphics g = Graphics.FromImage(image))
+        try
         {
-            g.Clear(Color.White);
-
-            Dictionary<Noeud, Point> positions = new Dictionary<Noeud, Point>();
-            int rayon = 200;
-            int centreX = largeurImage / 2;
-            int centreY = hauteurImage / 2;
-            int nbNoeuds = graphe.GetNoeuds().Count;
-            double angleStep = 2 * Math.PI / nbNoeuds;
-
-            int index = 0;
-            foreach (var noeud in graphe.GetNoeuds())
+            using (StreamReader sr = new StreamReader(cheminFichier))
             {
-                int x = centreX + (int)(rayon * Math.Cos(index * angleStep));
-                int y = centreY + (int)(rayon * Math.Sin(index * angleStep));
-                positions[noeud] = new Point(x, y);
-                index++;
-            }
+                string ligne;
+                bool debutData = false;
 
-            Pen pen = new Pen(Color.Black, 2);
-            foreach (var noeud in graphe.GetNoeuds())
-            {
-                foreach (var voisin in noeud.GetVoisins())
+                while ((ligne = sr.ReadLine()) != null)
                 {
-                    g.DrawLine(pen, positions[noeud], positions[voisin]);
+                    // Ignorer les commentaires qui commencent par %%
+                    if (ligne.StartsWith("%"))
+                        continue;
+
+                    // Détecter la première ligne contenant le nombre de sommets et d’arêtes
+                    if (!debutData)
+                    {
+                        debutData = true; // On passe aux données
+                        continue;
+                    }
+
+                    // Lire les relations (chaque ligne = "id1 id2")
+                    string[] parties = ligne.Split(' ');
+                    if (parties.Length >= 2)
+                    {
+                        int id1 = int.Parse(parties[0]);
+                        int id2 = int.Parse(parties[1]);
+
+                        // Ajouter les nœuds s'ils n'existent pas (en utilisant un dictionnaire)
+                        if (!Noeuds.Exists(n => n.Numero == id1))
+                            Noeuds.Add(new Noeud(id1));
+
+                        if (!Noeuds.Exists(n => n.Numero == id2))
+                            Noeuds.Add(new Noeud(id2));
+
+                        // Ajouter une relation entre les nœuds
+                        var noeud1 = Noeuds.First(n => n.Numero == id1);
+                        var noeud2 = Noeuds.First(n => n.Numero == id2);
+                        noeud1.AjouterVoisins(noeud2);
+                        noeud2.AjouterVoisins(noeud1); // Graphe non orienté
+
+                        // Ajouter le lien à la liste des liens
+                        Liens.Add(new Lien(noeud1, noeud2));
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Erreur lors de la lecture du fichier : " + ex.Message);
+        }
+    }
 
-            foreach (var entry in positions)
-            {
-                int x = entry.Value.X;
-                int y = entry.Value.Y;
-                g.FillEllipse(Brushes.Blue, x - 10, y - 10, 20, 20);
-                g.DrawString(entry.Key.Numero.ToString(), new Font("Arial", 12), Brushes.White, x - 7, y - 7);
-            }
+    public void DessinerGraphe(string cheminFichier)
+    {
+        int largeur = 800;
+        int hauteur = 600;
+        Bitmap bmp = new Bitmap(largeur, hauteur);
+        Graphics g = Graphics.FromImage(bmp);
+        g.Clear(Color.White);
+
+        // Définir une police et des pinceaux
+        Font font = new Font("Arial", 12);
+        Brush brush = Brushes.Black;
+        Pen pen = new Pen(Color.Black, 2);
+
+        // Placer les nœuds en cercle
+        int rayonCercle = 200;
+        Point centre = new Point(largeur / 2, hauteur / 2);
+        Dictionary<Noeud, Point> positions = new Dictionary<Noeud, Point>();
+
+        int totalNoeuds = Noeuds.Count;
+        for (int i = 0; i < totalNoeuds; i++)
+        {
+            double angle = i * (2 * Math.PI / totalNoeuds);
+            int x = centre.X + (int)(rayonCercle * Math.Cos(angle));
+            int y = centre.Y + (int)(rayonCercle * Math.Sin(angle));
+            positions[Noeuds[i]] = new Point(x, y);
         }
 
-        image.Save(cheminFichierImage);
-        Console.WriteLine($"Le graphe a été sauvegardé sous le nom '{cheminFichierImage}'.");
+        // Dessiner les liens
+        foreach (var lien in Liens)
+        {
+            Point p1 = positions[lien.Noeud1];
+            Point p2 = positions[lien.Noeud2];
+            g.DrawLine(pen, p1, p2);
+        }
+
+        // Dessiner les nœuds
+        foreach (var noeud in Noeuds)
+        {
+            Point pos = positions[noeud];
+            g.FillEllipse(Brushes.LightBlue, pos.X - 20, pos.Y - 20, 40, 40);
+            g.DrawEllipse(Pens.Black, pos.X - 20, pos.Y - 20, 40, 40);
+            g.DrawString(noeud.toString(), font, brush, pos.X - 10, pos.Y - 10);
+        }
+
+        // Sauvegarder l'image
+        bmp.Save(cheminFichier);
+        Console.WriteLine($"Image sauvegardée à {cheminFichier}");
     }
 }
+
+
+
