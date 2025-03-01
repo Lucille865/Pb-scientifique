@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +17,7 @@ namespace Pb_scientifique
             get;
         }
 
-        public Lien (Noeud noeud1, Noeud noeud2)
+        public Lien(Noeud noeud1, Noeud noeud2)
         {
             Noeud1 = noeud1;
             Noeud2 = noeud2;
