@@ -1,4 +1,4 @@
-﻿using Pb_scientifique;
+using Pb_scientifique;
 using System;
 using System.IO;
 
