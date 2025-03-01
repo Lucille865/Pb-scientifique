@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,18 +29,85 @@ namespace Pb_scientifique
             listeAdjacence[num2].Add(num1);
         }
 
-        // Afficher la liste d'adjacence
+
         public void AfficherListeAdjacence()
         {
-            Console.WriteLine("Liste d'adjacence du graphe :");
-            foreach (var noeud in listeAdjacence)
+            if (listeAdjacence.Count == 0)
             {
-                Console.Write(noeud.Key + " -> ");
-                Console.WriteLine(string.Join(", ", noeud.Value));
+                Console.WriteLine("Le graphe est vide.");
+                return;
+            }
+
+            int premierNoeud = listeAdjacence.Keys.First();
+
+            //AFFICHAGE POUR LE PARCOURS EN PROFONDEUR
+            HashSet<int> visitesDFS = new HashSet<int>();
+            List<int> ordreVisiteDFS = new List<int>();
+            ExplorerEnProfondeur(premierNoeud, visitesDFS, ordreVisiteDFS);
+
+            Console.WriteLine("\nListe d'adjacence selon le parcours en profondeur :");
+            AfficherListeAdjacenceDansOrdre(ordreVisiteDFS);
+
+            //AFFICHAGE POUR LE PARCOURS EN LARGEUR
+            HashSet<int> visitesBFS = new HashSet<int>();
+            List<int> ordreVisiteBFS = new List<int>();
+            ExplorerEnLargeur(premierNoeud, visitesBFS, ordreVisiteBFS);
+
+            Console.WriteLine("\nListe d'adjacence selon le parcours en largeur :");
+            AfficherListeAdjacenceDansOrdre(ordreVisiteBFS);
+        }
+
+        // Fonction qui affiche la liste d'adjacence dans un ordre donné
+        private void AfficherListeAdjacenceDansOrdre(List<int> ordreVisite)
+        {
+            foreach (var noeud in ordreVisite)
+            {
+                if (listeAdjacence.ContainsKey(noeud))
+                {
+                    Console.Write(noeud + " -> ");
+                    Console.WriteLine(string.Join(", ", listeAdjacence[noeud]));
+                }
             }
         }
 
-        // Vérifier si le graphe est connexe
+        // Explorateur en profondeur (DFS)
+        private void ExplorerEnProfondeur(int noeud, HashSet<int> visites, List<int> ordreVisite)
+        {
+            visites.Add(noeud);
+            ordreVisite.Add(noeud);
+
+            foreach (var voisin in listeAdjacence[noeud])
+            {
+                if (!visites.Contains(voisin))
+                    ExplorerEnProfondeur(voisin, visites, ordreVisite);
+            }
+        }
+
+        // Explorateur en largeur (BFS)
+        private void ExplorerEnLargeur(int sommetDepart, HashSet<int> visites, List<int> ordreVisite)
+        {
+            Queue<int> file = new Queue<int>();
+            file.Enqueue(sommetDepart);
+            visites.Add(sommetDepart);
+            ordreVisite.Add(sommetDepart);
+
+            while (file.Count > 0)
+            {
+                int noeud = file.Dequeue();
+
+                foreach (var voisin in listeAdjacence[noeud])
+                {
+                    if (!visites.Contains(voisin))
+                    {
+                        visites.Add(voisin);
+                        file.Enqueue(voisin);
+                        ordreVisite.Add(voisin);
+                    }
+                }
+            }
+        }
+
+
         public bool EstConnexe()
         {
             if (listeAdjacence.Count == 0) return false;
@@ -48,12 +115,11 @@ namespace Pb_scientifique
             HashSet<int> visites = new HashSet<int>();
             int premierNoeud = new List<int>(listeAdjacence.Keys)[0];
 
-            ExplorerEnProfondeur(premierNoeud, visites);
+            ExplorerEnProfondeur(premierNoeud, visites, new List<int>());
 
             return visites.Count == listeAdjacence.Count;
         }
 
-        // Vérifier si le graphe contient un cycle
         public bool ContientCycle()
         {
             HashSet<int> visites = new HashSet<int>();
@@ -67,7 +133,7 @@ namespace Pb_scientifique
             return false;
         }
 
-        // Parcours en profondeur pour vérifier la connexité
+        /*// Parcours en profondeur pour vérifier la connexité
         private void ExplorerEnProfondeur(int noeud, HashSet<int> visites)
         {
             visites.Add(noeud);
@@ -77,7 +143,7 @@ namespace Pb_scientifique
                     ExplorerEnProfondeur(voisin, visites);
             }
         }
-        /*// Parcours en largeur
+        // Parcours en largeur
         public void ParcoursLargeur(int sommetDepart)
         {
             HashSet<int> visites = new HashSet<int>(); // Pour garder une trace des sommets visités
@@ -103,9 +169,7 @@ namespace Pb_scientifique
                     }
                 }
             }
-            Console.WriteLine();
         }*/
-    
         // Parcours pour détecter un cycle
         private bool ExplorerCycle(int noeud, int parent, HashSet<int> visites)
         {
